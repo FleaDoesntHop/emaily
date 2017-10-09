@@ -2,18 +2,15 @@ import React, {Component} from 'react'
 import {reduxForm, Field} from 'redux-form'
 import {Link} from 'react-router-dom'
 import SurveyField from './SurveyField'
+import validateEmails from '../../utils/validateEmails'
+import formFields from './formFields'
 import _ from 'lodash'
 
-const FIELDS = [
-  {label: '标题', name: 'title'},
-  {label: '邮件主题', name: 'subject'},
-  {label: '邮件正文', name: 'body'},
-  {label: '收件人', name: 'emails'}
-];
+
 
 class SurveyForm extends Component {
   renderFields () {
-    return _.map(FIELDS, ({label, name}) => {
+    return _.map(formFields, ({label, name}) => {
       return <Field
         component={SurveyField}
         type="text"
@@ -28,7 +25,7 @@ class SurveyForm extends Component {
     return (
       <div className="container">
         <form
-          onSubmit={this.props.handleSubmit(values => console.log(values))}
+          onSubmit={this.props.handleSubmit(this.props.onSurveySubmit)}
         >
           {this.renderFields()}
           <Link to="/surveys" className="red btn-flat white-text">取消</Link>
@@ -45,7 +42,9 @@ class SurveyForm extends Component {
 function validate (values) {
   const errors = {}
 
-  _.each(FIELDS, ({label, name}) => {
+  errors.emails = validateEmails(values.emails || '')
+
+  _.each(formFields, ({label, name}) => {
     if (!values[name]) {
       errors[name] = `${label}内容不能为空！`
     }
@@ -56,5 +55,6 @@ function validate (values) {
 
 export default reduxForm({
   form: 'surveyForm',
-  validate
+  validate,
+  destroyOnUnmount: false
 })(SurveyForm)
